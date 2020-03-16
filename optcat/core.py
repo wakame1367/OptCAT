@@ -2,7 +2,7 @@ import copy
 from typing import Dict, Any, List, Callable, Optional, Union, Iterable
 
 import catboost as cb
-from optuna import distributions, integration
+from optuna import distributions
 from optuna import trial as trial_module
 from sklearn.model_selection import BaseCrossValidator
 
@@ -49,60 +49,16 @@ class _Objective:
     def __call__(self, trial: trial_module.Trial) -> float:
         params = self._get_params(trial)  # type: Dict[str, Any]
         dataset = copy.copy(self.dataset)
-        callbacks = self._get_callbacks(trial)  # type: List[Callable]
         eval_hist = cb.cv(
-            params,
-            dataset,
-            callbacks=callbacks,
-            categorical_feature=self.categorical_feature,
+            params=params,
+            dtrain=dataset,
             early_stopping_rounds=self.early_stopping_rounds,
-            feature_name=self.feature_name,
-            feval=self.feval,
-            fobj=self.fobj,
             folds=self.cv,
             num_boost_round=self.n_estimators,
         )  # Dict[str, List[float]]
         value = eval_hist["{}-mean".format(self.eval_name)][-1]  # type: float
-        is_best_trial = True  # type: bool
-
-        try:
-            is_best_trial = (
-                                value < trial.study.best_value
-                            ) ^ self.is_higher_better
-        except ValueError:
-            pass
-
-        if is_best_trial:
-            best_iteration = callbacks[0]._best_iteration  # type: ignore
-            boosters = callbacks[0]._boosters  # type: ignore
-            representations = []  # type: List[str]
-
-            for b in boosters:
-                b.free_dataset()
-                representations.append(b.model_to_string())
-
-            trial.study.set_user_attr("best_iteration", best_iteration)
-            trial.study.set_user_attr("representations", representations)
 
         return value
-
-    def _get_callbacks(self, trial: trial_module.Trial) -> List[Callable]:
-        extraction_callback = (
-            _LightGBMExtractionCallback()
-        )  # type: _LightGBMExtractionCallback
-        callbacks = [extraction_callback]  # type: List[Callable]
-
-        if self.enable_pruning:
-            pruning_callback = integration.LightGBMPruningCallback(
-                trial, self.eval_name
-            )  # type: integration.LightGBMPruningCallback
-
-            callbacks.append(pruning_callback)
-
-        if self.callbacks is not None:
-            callbacks += self.callbacks
-
-        return callbacks
 
     def _get_params(self, trial: trial_module.Trial) -> Dict[str, Any]:
         params = self.params.copy()  # type: Dict[str, Any]
