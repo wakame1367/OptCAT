@@ -8,7 +8,7 @@ readme = "README.md"
 repository = "https://github.com/wakamezake/python-package-template"
 
 [tool.poetry.dependencies]
-python = ">=3.6"
+python = ">=3.6.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
