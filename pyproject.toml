@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "OptCAT"
+version = "0.1.0"
+description = "See README.md"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/wakamezake/python-package-template"
+
+[tool.poetry.dependencies]
+python = ">=3.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pre-commit = "*"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
