@@ -9,6 +9,10 @@ repository = "https://github.com/wakamezake/python-package-template"
 
 [tool.poetry.dependencies]
 python = ">=3.6.1"
+catboost = "^0.22"
+scikit-learn = "^0.22.2"
+pandas = "^1.0.2"
+optuna = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
