@@ -19,8 +19,6 @@ class _Objective:
         n_samples: int,
         cv: Optional[CVType] = None,
         early_stopping_rounds: Optional[int] = None,
-        f_eval: Optional[Callable] = None,
-        f_obj: Optional[Callable] = None,
         n_estimators: int = 100,
         param_distributions: Optional[
             Dict[str, distributions.BaseDistribution]
@@ -30,8 +28,6 @@ class _Objective:
         self.dataset = dataset
         self.early_stopping_rounds = early_stopping_rounds
         self.eval_name = eval_name
-        self.feval = f_eval
-        self.fobj = f_obj
         self.is_higher_better = is_higher_better
         self.n_estimators = n_estimators
         self.n_samples = n_samples
@@ -46,9 +42,10 @@ class _Objective:
             dtrain=dataset,
             early_stopping_rounds=self.early_stopping_rounds,
             folds=self.cv,
-            num_boost_round=self.n_estimators,
+            iterations=self.n_estimators,
+            as_pandas=False
         )  # Dict[str, List[float]]
-        value = eval_hist["{}-mean".format(self.eval_name)][-1]  # type: float
+        value = eval_hist["test-{}-mean".format(self.eval_name)][-1] # type: float
 
         return value
 
@@ -73,12 +70,12 @@ class _Objective:
                 "lambda_l2", 1e-09, 10.0
             )
 
-            if params["boosting_type"] == "Bayesian":
+            if params["bootstrap_type"] == "Bayesian":
                 params["bagging_temperature"] = trial.suggest_discrete_uniform(
                     "bagging_temperature", 0.5, 0.95, 0.05
                 )
-            elif params["boosting_type"] == "Bernoulli" or \
-                params["boosting_type"] == "Poisson":
+            elif params["bootstrap_type"] == "Bernoulli" or \
+                params["bootstrap_type"] == "Poisson":
                 params["subsample"] = trial.suggest_uniform(
                     "subsample", 0.1, 1
                 )
