@@ -36,10 +36,9 @@ class _Objective:
 
     def __call__(self, trial: trial_module.Trial) -> float:
         params = self._get_params(trial)  # type: Dict[str, Any]
-        dataset = copy.copy(self.dataset)
         eval_hist = cb.cv(
             params=params,
-            dtrain=dataset,
+            dtrain=self.dataset,
             early_stopping_rounds=self.early_stopping_rounds,
             folds=self.cv,
             iterations=self.n_estimators,
