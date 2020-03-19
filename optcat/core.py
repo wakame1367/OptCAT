@@ -46,7 +46,6 @@ class _Objective:
             as_pandas=False
         )  # Dict[str, List[float]]
         value = eval_hist["test-{}-mean".format(self.eval_name)][-1] # type: float
-
         return value
 
     def _get_params(self, trial: trial_module.Trial) -> Dict[str, Any]:
