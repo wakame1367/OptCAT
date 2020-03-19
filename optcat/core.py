@@ -44,6 +44,7 @@ class _Objective:
             dtrain=self.dataset,
             early_stopping_rounds=self.early_stopping_rounds,
             folds=self.cv,
+            verbose=False,
             iterations=self.n_estimators,
             as_pandas=False
         )  # Dict[str, List[float]]
