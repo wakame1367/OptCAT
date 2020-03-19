@@ -5,6 +5,8 @@ import logging
 from pkg_resources import DistributionNotFound
 from pkg_resources import get_distribution
 
+from . import core
+
 try:
     distribution = get_distribution(__name__)
     __version__ = distribution.version
