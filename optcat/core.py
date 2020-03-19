@@ -60,10 +60,12 @@ class _Objective:
                 "colsample_bylevel", 0.1, 1.0, 0.05
             )
             params["max_depth"] = trial.suggest_int("max_depth", 1, 7)
-            params["num_leaves"] = trial.suggest_int(
-                "num_leaves", 2, 2 ** params["max_depth"]
-            )
+            # https://catboost.ai/docs/concepts/parameter-tuning.html#tree-growing-policy
+            # params["num_leaves"] = trial.suggest_int(
+            #     "num_leaves", 2, 2 ** params["max_depth"]
+            # )
             # See https://github.com/Microsoft/LightGBM/issues/907
+            params["num_leaves"] = 31
             params["min_data_in_leaf"] = trial.suggest_int(
                 "min_data_in_leaf",
                 1,
@@ -92,13 +94,14 @@ class _Objective:
 
 
 class CatBoostBase(cb.CatBoost):
-    def __init__(self, refit: bool = False, cv: CVType = 5, n_trials: int = 20,
+    def __init__(self, params, refit: bool = False, cv: CVType = 5,
+                 n_trials: int = 20,
                  param_distributions: Optional[
                      Dict[str, distributions.BaseDistribution]
                  ] = None,
                  study: Optional[study_module.Study] = None,
                  timeout: Optional[float] = None):
-        super().__init__()
+        super().__init__(params)
         self.refit = refit
         self.cv = cv
         self.n_trials = n_trials
@@ -160,8 +163,16 @@ class CatBoostBase(cb.CatBoost):
 
 
 class CatBoostClassifier(CatBoostBase, ClassifierMixin):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, params, refit: bool = False, cv: CVType = 5,
+                 n_trials: int = 20,
+                 param_distributions: Optional[
+                     Dict[str, distributions.BaseDistribution]
+                 ] = None,
+                 study: Optional[study_module.Study] = None,
+                 timeout: Optional[float] = None):
+        super().__init__(params, refit=refit, cv=cv, n_trials=n_trials,
+                         param_distributions=param_distributions,
+                         study=study, timeout=timeout)
 
     def predict(self, data, prediction_type='RawFormulaVal', ntree_start=0,
                 ntree_end=0, thread_count=-1, verbose=None):
@@ -175,8 +186,15 @@ class CatBoostClassifier(CatBoostBase, ClassifierMixin):
 
 
 class CatBoostRegressor(CatBoostBase, RegressorMixin):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, params, refit: bool = False, cv: CVType = 5,
+                 n_trials: int = 20,
+                 param_distributions: Optional[
+                     Dict[str, distributions.BaseDistribution]] = None,
+                 study: Optional[study_module.Study] = None,
+                 timeout: Optional[float] = None):
+        super().__init__(params, refit=refit, cv=cv, n_trials=n_trials,
+                         param_distributions=param_distributions,
+                         study=study, timeout=timeout)
 
     def predict(self, data, prediction_type='RawFormulaVal', ntree_start=0,
                 ntree_end=0, thread_count=-1, verbose=None):
