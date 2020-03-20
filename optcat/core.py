@@ -12,6 +12,26 @@ from sklearn.model_selection import BaseCrossValidator, check_cv
 CVType = Union[int, Iterable, BaseCrossValidator]
 
 
+# https://catboost.ai/docs/references/eval-metric__supported-metrics.html
+def _is_higher_better(metric: str) -> bool:
+    """
+
+    Args:
+        metric:
+
+    Returns:
+
+    >>> _is_higher_better("AUC")
+    True
+    >>> _is_higher_better("auc")
+    False
+    """
+    higher_better_metrics = {"Recall", "Precision", "F1", "TotalF1",
+                             "Accuracy", "AUC", "R2", "BrierScore",
+                             "Kappa", "WKappa", "DCG", "NDCG"}
+    return metric in higher_better_metrics
+
+
 class _Objective:
     def __init__(
         self,
@@ -121,17 +141,26 @@ class CatBoostBase(cb.CatBoost):
             init_model=None):
         logger = logging.getLogger(__name__)
 
-        n_samples, _ = X.shape
-        params = self._init_params.copy()
+        # catboost\core.py
+        # CatBoost._prepare_train_params
+        train_params = self._prepare_train_params(
+            X, y, cat_features, text_features, pairs, sample_weight, group_id,
+            group_weight, subgroup_id, pairs_weight, baseline,
+            use_best_model, eval_set, verbose, logging_level, plot,
+            column_description, verbose_eval, metric_period, silent,
+            early_stopping_rounds,
+            save_snapshot, snapshot_file, snapshot_interval, init_model
+        )
 
+        n_samples, _ = X.shape
         # get_params
+        params = train_params["params"]
         eval_name = params.get("loss_function")
         early_stopping_rounds = early_stopping_rounds
         n_estimators = params.get("iterations")
 
         is_classifier = self._estimator_type == "classifier"
-        # TODO: auto_detect
-        is_higher_better = False
+        is_higher_better = _is_higher_better(eval_name)
         cv = check_cv(cv=self.cv, y=y, classifier=is_classifier)
 
         if self.study is None:
