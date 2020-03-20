@@ -6,6 +6,7 @@ authors = ["wakame1367 <hotwater1367@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/wakamezake/OptCAT"
+keywords = ["catboost", "optuna", "hyperparameter tuning"]
 
 [tool.poetry.dependencies]
 python = ">=3.6.1"
