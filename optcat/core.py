@@ -121,10 +121,20 @@ class CatBoostBase(cb.CatBoost):
             init_model=None):
         logger = logging.getLogger(__name__)
 
-        n_samples, _ = X.shape
-        params = self._init_params.copy()
+        # catboost\core.py
+        # CatBoost._prepare_train_params
+        train_params = self._prepare_train_params(
+            X, y, cat_features, text_features, pairs, sample_weight, group_id,
+            group_weight, subgroup_id, pairs_weight, baseline,
+            use_best_model, eval_set, verbose, logging_level, plot,
+            column_description, verbose_eval, metric_period, silent,
+            early_stopping_rounds,
+            save_snapshot, snapshot_file, snapshot_interval, init_model
+        )
 
+        n_samples, _ = X.shape
         # get_params
+        params = train_params["params"]
         eval_name = params.get("loss_function")
         early_stopping_rounds = early_stopping_rounds
         n_estimators = params.get("iterations")
