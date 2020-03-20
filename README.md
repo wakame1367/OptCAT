@@ -2,6 +2,7 @@
 
 <p align="center">
 <a href="https://github.com/wakamezake/OptCAT/actions"><img alt="Actions Status" src="https://github.com/wakamezake/OptCAT/workflows/Python package/badge.svg"></a>
+<a href="https://pypi.org/project/optcat/"><img alt="Actions Status" src="https://badge.fury.io/py/optcat.svg"></a>
 <a href="https://github.com/wakamezake/OptCAT/master/LICENSE"><img alt="License: MIT" src="http://img.shields.io/badge/license-MIT-blue.svg"></a>
 </p>
 
@@ -29,7 +30,7 @@ model.fit(X=data, y=target)
 ## Installation
 
 ```
-pip install git+https://github.com/wakamezake/OptCAT.git
+pip install optcat
 ```
 
 ## Testing
