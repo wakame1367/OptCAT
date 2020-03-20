@@ -160,8 +160,7 @@ class CatBoostBase(cb.CatBoost):
         n_estimators = params.get("iterations")
 
         is_classifier = self._estimator_type == "classifier"
-        # TODO: auto_detect
-        is_higher_better = False
+        is_higher_better = _is_higher_better(eval_name)
         cv = check_cv(cv=self.cv, y=y, classifier=is_classifier)
 
         if self.study is None:
