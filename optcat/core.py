@@ -12,6 +12,26 @@ from sklearn.model_selection import BaseCrossValidator, check_cv
 CVType = Union[int, Iterable, BaseCrossValidator]
 
 
+# https://catboost.ai/docs/references/eval-metric__supported-metrics.html
+def _is_higher_better(metric: str) -> bool:
+    """
+
+    Args:
+        metric:
+
+    Returns:
+
+    >>> _is_higher_better("AUC")
+    True
+    >>> _is_higher_better("auc")
+    False
+    """
+    higher_better_metrics = {"Recall", "Precision", "F1", "TotalF1",
+                             "Accuracy", "AUC", "R2", "BrierScore",
+                             "Kappa", "WKappa", "DCG", "NDCG"}
+    return metric in higher_better_metrics
+
+
 class _Objective:
     def __init__(
         self,
