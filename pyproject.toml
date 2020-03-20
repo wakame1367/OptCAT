@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "OptCAT"
 version = "0.1.0"
-description = "See README.md"
+description = "OptCAT (= Optuna + CatBoost) provides a scikit-learn compatible estimator that tunes hyperparameters in CatBoost with Optuna."
 authors = ["wakame1367 <hotwater1367@gmail.com>"]
 license = "MIT"
 readme = "README.md"
