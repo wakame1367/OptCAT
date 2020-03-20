@@ -1,3 +1,4 @@
+import pytest
 from sklearn import datasets
 
 from optcat.core import CatBoostClassifier, CatBoostRegressor
@@ -14,6 +15,27 @@ def test_classifier_fit():
     }
     model = CatBoostClassifier(params=params, n_trials=N_TRIALS)
     data, target = datasets.load_breast_cancer(return_X_y=True)
+    model.fit(X=data, y=target)
+
+
+@pytest.mark.parametrize("metric_name", ["loss_function", "objective"])
+def test_fit_with_param_alias(metric_name):
+    params = {
+        "bootstrap_type": "Bayesian",
+        metric_name: "Logloss",
+        "iterations": ITERATIONS
+    }
+    model = CatBoostClassifier(params=params, n_trials=N_TRIALS)
+    data, target = datasets.load_breast_cancer(return_X_y=True)
+    model.fit(X=data, y=target)
+
+    params = {
+        "bootstrap_type": "Bayesian",
+        metric_name: "RMSE",
+        "iterations": ITERATIONS
+    }
+    model = CatBoostRegressor(params=params, n_trials=N_TRIALS)
+    data, target = datasets.load_boston(return_X_y=True)
     model.fit(X=data, y=target)
 
 
