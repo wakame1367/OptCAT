@@ -29,7 +29,7 @@ model.fit(X=data, y=target)
 ## Installation
 
 ```
-pip install git+https://github.com/wakamezake/OptCAT.git
+pip install optcat
 ```
 
 ## Testing
