@@ -5,7 +5,7 @@ description = "See README.md"
 authors = ["Your Name <you@example.com>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/wakamezake/python-package-template"
+repository = "https://github.com/wakamezake/OptCAT"
 
 [tool.poetry.dependencies]
 python = ">=3.6.1"
