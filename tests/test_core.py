@@ -11,7 +11,7 @@ def test_classifier_fit():
     params = {
         "bootstrap_type": "Bayesian",
         "loss_function": "Logloss",
-        "iterations": ITERATIONS
+        "iterations": ITERATIONS,
     }
     model = CatBoostClassifier(params=params, n_trials=N_TRIALS)
     data, target = datasets.load_breast_cancer(return_X_y=True)
@@ -23,7 +23,7 @@ def test_fit_with_param_alias(metric_name):
     params = {
         "bootstrap_type": "Bayesian",
         metric_name: "Logloss",
-        "iterations": ITERATIONS
+        "iterations": ITERATIONS,
     }
     model = CatBoostClassifier(params=params, n_trials=N_TRIALS)
     data, target = datasets.load_breast_cancer(return_X_y=True)
@@ -32,7 +32,7 @@ def test_fit_with_param_alias(metric_name):
     params = {
         "bootstrap_type": "Bayesian",
         metric_name: "RMSE",
-        "iterations": ITERATIONS
+        "iterations": ITERATIONS,
     }
     model = CatBoostRegressor(params=params, n_trials=N_TRIALS)
     data, target = datasets.load_boston(return_X_y=True)
@@ -43,7 +43,7 @@ def test_regressor_fit():
     params = {
         "bootstrap_type": "Bayesian",
         "loss_function": "RMSE",
-        "iterations": ITERATIONS
+        "iterations": ITERATIONS,
     }
     model = CatBoostRegressor(params=params, n_trials=N_TRIALS)
     data, target = datasets.load_boston(return_X_y=True)
