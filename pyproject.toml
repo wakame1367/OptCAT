@@ -20,6 +20,25 @@ pytest = "*"
 pre-commit = "*"
 flake8 = "*"
 mypy = "*"
+black = "*"
+
+[tool.black]
+line-length = 88
+target-version = ['py36', 'py37', 'py38']
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
 
 [build-system]
 requires = ["poetry>=0.12"]
