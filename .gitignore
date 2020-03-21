@@ -4,6 +4,9 @@
 ### own directories
 resources/*
 
+# poetry
+poetry.lock
+
 ### JupyterNotebook ###
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
