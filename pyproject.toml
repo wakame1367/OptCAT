@@ -19,6 +19,7 @@ optuna = "^1.2.0"
 pytest = "*"
 pre-commit = "*"
 flake8 = "*"
+mypy = "*"
 
 [build-system]
 requires = ["poetry>=0.12"]
