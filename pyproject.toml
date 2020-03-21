@@ -20,7 +20,6 @@ pytest = "*"
 pre-commit = "*"
 flake8 = "*"
 mypy = "*"
-black = "*"
 
 [tool.black]
 line-length = 88
