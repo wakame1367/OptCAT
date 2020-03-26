@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, Any, Optional, Union
-
+import numpy as np
 import catboost as cb
 from optuna import distributions
 from optuna import samplers
@@ -256,7 +256,7 @@ class CatBoostBase(cb.CatBoost):
         ntree_end: int = 0,
         thread_count: int = -1,
         verbose: Optional[bool] = None,
-    ):
+    ) -> Union[float, np.ndarray]:
         return self._predict(
             data,
             "RawFormulaVal",
@@ -296,7 +296,7 @@ class CatBoostClassifier(CatBoostBase, ClassifierMixin):
         ntree_end: int = 0,
         thread_count: int = -1,
         verbose: Optional[bool] = None,
-    ):
+    ) -> np.ndarray:
         return self._predict(
             data,
             "Probability",
