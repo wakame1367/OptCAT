@@ -1,9 +1,7 @@
 import logging
-from typing import Dict, Any, Optional, Union, List
+from typing import Dict, Any, Optional, Union
 
 import catboost as cb
-import numpy as np
-import pandas as pd
 from optuna import distributions
 from optuna import samplers
 from optuna import study as study_module
@@ -11,7 +9,14 @@ from optuna import trial as trial_module
 from sklearn.base import RegressorMixin, ClassifierMixin
 from sklearn.model_selection import check_cv
 
-from .typing import CVType, MultipleDataType, TargetDataType
+from .typing import (
+    CVType,
+    MultipleDataType,
+    TargetDataType,
+    PairsType,
+    SampleWeightType,
+    FeatureType,
+)
 
 
 # https://catboost.ai/docs/references/eval-metric__supported-metrics.html
@@ -145,17 +150,15 @@ class CatBoostBase(cb.CatBoost):
         self,
         X: MultipleDataType,
         y: Optional[TargetDataType] = None,
-        cat_features: Optional[Union[List, np.ndarray]] = None,
-        text_features: Optional[Union[List, np.ndarray]] = None,
-        pairs: Optional[Union[List, np.ndarray, pd.DataFrame]] = None,
-        sample_weight: Optional[
-            Union[List, np.ndarray, pd.DataFrame, pd.Series]
-        ] = None,
-        group_id: Optional[Union[List, np.ndarray]] = None,
-        group_weight: Optional[Union[List, np.ndarray]] = None,
-        subgroup_id: Optional[Union[List, np.ndarray]] = None,
-        pairs_weight: Optional[Union[List, np.ndarray]] = None,
-        baseline: Optional[Union[List, np.ndarray]] = None,
+        cat_features: Optional[FeatureType] = None,
+        text_features: Optional[FeatureType] = None,
+        pairs: Optional[PairsType] = None,
+        sample_weight: SampleWeightType = None,
+        group_id: Optional[FeatureType] = None,
+        group_weight: Optional[FeatureType] = None,
+        subgroup_id: Optional[FeatureType] = None,
+        pairs_weight: Optional[FeatureType] = None,
+        baseline: Optional[FeatureType] = None,
         use_best_model: Optional[bool] = None,
         eval_set: Optional[cb.Pool] = None,
         verbose: Optional[Union[bool, int]] = None,
