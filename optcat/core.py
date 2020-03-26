@@ -256,7 +256,7 @@ class CatBoostBase(cb.CatBoost):
         ntree_end: int = 0,
         thread_count: int = -1,
         verbose: Optional[bool] = None,
-    ) -> Union[float, np.ndarray]:
+    ) -> np.ndarray:
         return self._predict(
             data,
             "RawFormulaVal",
