@@ -1,15 +1,22 @@
 import logging
-from typing import Dict, Any, Optional, Union, Iterable
+from typing import Dict, Any, Optional, Union, Iterable, List
 
 import catboost as cb
+import numpy as np
+import pandas as pd
 from optuna import distributions
 from optuna import samplers
 from optuna import study as study_module
 from optuna import trial as trial_module
+from scipy.sparse import spmatrix
 from sklearn.base import RegressorMixin, ClassifierMixin
 from sklearn.model_selection import BaseCrossValidator, check_cv
 
 CVType = Union[int, Iterable, BaseCrossValidator]
+TargetDataType = Union[cb.Pool, np.ndarray, pd.DataFrame, pd.Series]
+TwoDimFeatureType = Union[List, pd.DataFrame, pd.Series]
+TwoDimSparseType = Union[pd.SparseDataFrame, spmatrix]
+MultipleDataType = Union[cb.Pool, TwoDimFeatureType, TwoDimSparseType]
 
 
 # https://catboost.ai/docs/references/eval-metric__supported-metrics.html
@@ -54,7 +61,8 @@ class _Objective:
         cv: Optional[CVType] = None,
         early_stopping_rounds: Optional[int] = None,
         n_estimators: int = 100,
-        param_distributions: Optional[Dict[str, distributions.BaseDistribution]] = None,
+        param_distributions: Optional[
+            Dict[str, distributions.BaseDistribution]] = None,
     ) -> None:
         self.cv = cv
         self.dataset = dataset
@@ -77,7 +85,8 @@ class _Objective:
             iterations=self.n_estimators,
             as_pandas=False,
         )  # Dict[str, List[float]]
-        value = eval_hist["test-{}-mean".format(self.eval_name)][-1]  # type: float
+        value = eval_hist["test-{}-mean".format(self.eval_name)][
+            -1]  # type: float
 
         return value
 
@@ -100,7 +109,8 @@ class _Objective:
                 1,
                 max(1, int(self.n_samples / params["num_leaves"])),
             )
-            params["l2_leaf_reg"] = trial.suggest_loguniform("lambda_l2", 1e-09, 10.0)
+            params["l2_leaf_reg"] = trial.suggest_loguniform("lambda_l2", 1e-09,
+                                                             10.0)
 
             if params["bootstrap_type"] == "Bayesian":
                 params["bagging_temperature"] = trial.suggest_discrete_uniform(
@@ -123,11 +133,12 @@ class _Objective:
 class CatBoostBase(cb.CatBoost):
     def __init__(
         self,
-        params,
+        params: Dict[str, Any],
         refit: bool = False,
         cv: CVType = 5,
         n_trials: int = 20,
-        param_distributions: Optional[Dict[str, distributions.BaseDistribution]] = None,
+        param_distributions: Optional[
+            Dict[str, distributions.BaseDistribution]] = None,
         study: Optional[study_module.Study] = None,
         timeout: Optional[float] = None,
     ):
@@ -141,31 +152,33 @@ class CatBoostBase(cb.CatBoost):
 
     def fit(
         self,
-        X,
-        y=None,
-        cat_features=None,
-        text_features=None,
-        pairs=None,
-        sample_weight=None,
-        group_id=None,
-        group_weight=None,
-        subgroup_id=None,
-        pairs_weight=None,
-        baseline=None,
-        use_best_model=None,
-        eval_set=None,
-        verbose=None,
-        logging_level=None,
-        plot=False,
-        column_description=None,
-        verbose_eval=None,
-        metric_period=None,
-        silent=None,
-        early_stopping_rounds=None,
-        save_snapshot=None,
-        snapshot_file=None,
-        snapshot_interval=None,
-        init_model=None,
+        X: MultipleDataType,
+        y: Optional[TargetDataType] = None,
+        cat_features: Optional[Union[List, np.ndarray]] = None,
+        text_features: Optional[Union[List, np.ndarray]] = None,
+        pairs: Optional[
+            Union[List, np.ndarray, pd.DataFrame]] = None,
+        sample_weight: Optional[
+            Union[List, np.ndarray, pd.DataFrame, pd.Series]] = None,
+        group_id: Optional[Union[List, np.ndarray]] = None,
+        group_weight: Optional[Union[List, np.ndarray]] = None,
+        subgroup_id: Optional[Union[List, np.ndarray]] = None,
+        pairs_weight: Optional[Union[List, np.ndarray]] = None,
+        baseline: Optional[Union[List, np.ndarray]] = None,
+        use_best_model: Optional[bool] = None,
+        eval_set: Optional[cb.Pool] = None,
+        verbose: Optional[Union[bool, int]] = None,
+        logging_level: Optional[str] = None,
+        plot: bool = False,
+        column_description: Optional[str] = None,
+        verbose_eval: Optional[Union[bool, int]] = None,
+        metric_period: Optional[int] = None,
+        silent: Optional[bool] = None,
+        early_stopping_rounds: Optional[int] = None,
+        save_snapshot: Optional[bool] = None,
+        snapshot_file: Optional[str] = None,
+        snapshot_interval: Optional[int] = None,
+        init_model: Optional[str] = None,
     ):
         logger = logging.getLogger(__name__)
 
@@ -213,7 +226,8 @@ class CatBoostBase(cb.CatBoost):
         if self.study is None:
             sampler = samplers.RandomSampler()
             direction = "maximize" if is_higher_better else "minimize"
-            self.study = study_module.create_study(direction=direction, sampler=sampler)
+            self.study = study_module.create_study(direction=direction,
+                                                   sampler=sampler)
         # hyper_parameter tuning
         dataset = cb.Pool(X, label=y)
         objective = _Objective(
@@ -229,7 +243,8 @@ class CatBoostBase(cb.CatBoost):
         )
 
         logger.info("Searching the best hyper_parameters")
-        self.study.optimize(objective, n_trials=self.n_trials, timeout=self.timeout)
+        self.study.optimize(objective, n_trials=self.n_trials,
+                            timeout=self.timeout)
         logger.info("Done")
 
         logger.info("Starting refit")
@@ -245,11 +260,12 @@ class CatBoostBase(cb.CatBoost):
 class CatBoostClassifier(CatBoostBase, ClassifierMixin):
     def __init__(
         self,
-        params,
+        params: Dict[str, Any],
         refit: bool = False,
         cv: CVType = 5,
         n_trials: int = 20,
-        param_distributions: Optional[Dict[str, distributions.BaseDistribution]] = None,
+        param_distributions: Optional[
+            Dict[str, distributions.BaseDistribution]] = None,
         study: Optional[study_module.Study] = None,
         timeout: Optional[float] = None,
     ):
@@ -266,11 +282,11 @@ class CatBoostClassifier(CatBoostBase, ClassifierMixin):
     def predict(
         self,
         data,
-        prediction_type="RawFormulaVal",
-        ntree_start=0,
-        ntree_end=0,
-        thread_count=-1,
-        verbose=None,
+        prediction_type: str = "RawFormulaVal",
+        ntree_start: int = 0,
+        ntree_end: int = 0,
+        thread_count: int = -1,
+        verbose: Optional[bool] = None,
     ):
         return self._predict(
             data,
@@ -283,7 +299,8 @@ class CatBoostClassifier(CatBoostBase, ClassifierMixin):
         )
 
     def predict_proba(
-        self, data, ntree_start=0, ntree_end=0, thread_count=-1, verbose=None
+        self, data, ntree_start: int = 0, ntree_end: int = 0,
+        thread_count: int = -1, verbose: Optional[bool] = None
     ):
         return self._predict(
             data,
@@ -299,11 +316,12 @@ class CatBoostClassifier(CatBoostBase, ClassifierMixin):
 class CatBoostRegressor(CatBoostBase, RegressorMixin):
     def __init__(
         self,
-        params,
+        params: Dict[str, Any],
         refit: bool = False,
         cv: CVType = 5,
         n_trials: int = 20,
-        param_distributions: Optional[Dict[str, distributions.BaseDistribution]] = None,
+        param_distributions: Optional[
+            Dict[str, distributions.BaseDistribution]] = None,
         study: Optional[study_module.Study] = None,
         timeout: Optional[float] = None,
     ):
@@ -320,11 +338,11 @@ class CatBoostRegressor(CatBoostBase, RegressorMixin):
     def predict(
         self,
         data,
-        prediction_type="RawFormulaVal",
-        ntree_start=0,
-        ntree_end=0,
-        thread_count=-1,
-        verbose=None,
+        prediction_type: str = "RawFormulaVal",
+        ntree_start: int = 0,
+        ntree_end: int = 0,
+        thread_count: int = -1,
+        verbose: Optional[bool] = None,
     ):
         return self._predict(
             data,
