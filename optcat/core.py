@@ -61,8 +61,7 @@ class _Objective:
         cv: Optional[CVType] = None,
         early_stopping_rounds: Optional[int] = None,
         n_estimators: int = 100,
-        param_distributions: Optional[
-            Dict[str, distributions.BaseDistribution]] = None,
+        param_distributions: Optional[Dict[str, distributions.BaseDistribution]] = None,
     ) -> None:
         self.cv = cv
         self.dataset = dataset
@@ -85,8 +84,7 @@ class _Objective:
             iterations=self.n_estimators,
             as_pandas=False,
         )  # Dict[str, List[float]]
-        value = eval_hist["test-{}-mean".format(self.eval_name)][
-            -1]  # type: float
+        value = eval_hist["test-{}-mean".format(self.eval_name)][-1]  # type: float
 
         return value
 
@@ -109,8 +107,7 @@ class _Objective:
                 1,
                 max(1, int(self.n_samples / params["num_leaves"])),
             )
-            params["l2_leaf_reg"] = trial.suggest_loguniform("lambda_l2", 1e-09,
-                                                             10.0)
+            params["l2_leaf_reg"] = trial.suggest_loguniform("lambda_l2", 1e-09, 10.0)
 
             if params["bootstrap_type"] == "Bayesian":
                 params["bagging_temperature"] = trial.suggest_discrete_uniform(
@@ -137,8 +134,7 @@ class CatBoostBase(cb.CatBoost):
         refit: bool = False,
         cv: CVType = 5,
         n_trials: int = 20,
-        param_distributions: Optional[
-            Dict[str, distributions.BaseDistribution]] = None,
+        param_distributions: Optional[Dict[str, distributions.BaseDistribution]] = None,
         study: Optional[study_module.Study] = None,
         timeout: Optional[float] = None,
     ):
@@ -156,10 +152,10 @@ class CatBoostBase(cb.CatBoost):
         y: Optional[TargetDataType] = None,
         cat_features: Optional[Union[List, np.ndarray]] = None,
         text_features: Optional[Union[List, np.ndarray]] = None,
-        pairs: Optional[
-            Union[List, np.ndarray, pd.DataFrame]] = None,
+        pairs: Optional[Union[List, np.ndarray, pd.DataFrame]] = None,
         sample_weight: Optional[
-            Union[List, np.ndarray, pd.DataFrame, pd.Series]] = None,
+            Union[List, np.ndarray, pd.DataFrame, pd.Series]
+        ] = None,
         group_id: Optional[Union[List, np.ndarray]] = None,
         group_weight: Optional[Union[List, np.ndarray]] = None,
         subgroup_id: Optional[Union[List, np.ndarray]] = None,
@@ -212,7 +208,7 @@ class CatBoostBase(cb.CatBoost):
             init_model,
         )
 
-        n_samples, _ = X.shape
+        n_samples = len(X)
         # get_params
         params = train_params["params"]
         eval_name = params.get("loss_function")
@@ -226,8 +222,7 @@ class CatBoostBase(cb.CatBoost):
         if self.study is None:
             sampler = samplers.RandomSampler()
             direction = "maximize" if is_higher_better else "minimize"
-            self.study = study_module.create_study(direction=direction,
-                                                   sampler=sampler)
+            self.study = study_module.create_study(direction=direction, sampler=sampler)
         # hyper_parameter tuning
         dataset = cb.Pool(X, label=y)
         objective = _Objective(
@@ -243,8 +238,7 @@ class CatBoostBase(cb.CatBoost):
         )
 
         logger.info("Searching the best hyper_parameters")
-        self.study.optimize(objective, n_trials=self.n_trials,
-                            timeout=self.timeout)
+        self.study.optimize(objective, n_trials=self.n_trials, timeout=self.timeout)
         logger.info("Done")
 
         logger.info("Starting refit")
@@ -256,6 +250,25 @@ class CatBoostBase(cb.CatBoost):
     def _refit(self):
         pass
 
+    def predict(
+        self,
+        data,
+        prediction_type: str = "RawFormulaVal",
+        ntree_start: int = 0,
+        ntree_end: int = 0,
+        thread_count: int = -1,
+        verbose: Optional[bool] = None,
+    ):
+        return self._predict(
+            data,
+            "RawFormulaVal",
+            ntree_start,
+            ntree_end,
+            thread_count,
+            verbose,
+            "predict",
+        )
+
 
 class CatBoostClassifier(CatBoostBase, ClassifierMixin):
     def __init__(
@@ -264,8 +277,7 @@ class CatBoostClassifier(CatBoostBase, ClassifierMixin):
         refit: bool = False,
         cv: CVType = 5,
         n_trials: int = 20,
-        param_distributions: Optional[
-            Dict[str, distributions.BaseDistribution]] = None,
+        param_distributions: Optional[Dict[str, distributions.BaseDistribution]] = None,
         study: Optional[study_module.Study] = None,
         timeout: Optional[float] = None,
     ):
@@ -279,28 +291,13 @@ class CatBoostClassifier(CatBoostBase, ClassifierMixin):
             timeout=timeout,
         )
 
-    def predict(
+    def predict_proba(
         self,
         data,
-        prediction_type: str = "RawFormulaVal",
         ntree_start: int = 0,
         ntree_end: int = 0,
         thread_count: int = -1,
         verbose: Optional[bool] = None,
-    ):
-        return self._predict(
-            data,
-            prediction_type,
-            ntree_start,
-            ntree_end,
-            thread_count,
-            verbose,
-            "predict",
-        )
-
-    def predict_proba(
-        self, data, ntree_start: int = 0, ntree_end: int = 0,
-        thread_count: int = -1, verbose: Optional[bool] = None
     ):
         return self._predict(
             data,
@@ -320,8 +317,7 @@ class CatBoostRegressor(CatBoostBase, RegressorMixin):
         refit: bool = False,
         cv: CVType = 5,
         n_trials: int = 20,
-        param_distributions: Optional[
-            Dict[str, distributions.BaseDistribution]] = None,
+        param_distributions: Optional[Dict[str, distributions.BaseDistribution]] = None,
         study: Optional[study_module.Study] = None,
         timeout: Optional[float] = None,
     ):
@@ -333,23 +329,4 @@ class CatBoostRegressor(CatBoostBase, RegressorMixin):
             param_distributions=param_distributions,
             study=study,
             timeout=timeout,
-        )
-
-    def predict(
-        self,
-        data,
-        prediction_type: str = "RawFormulaVal",
-        ntree_start: int = 0,
-        ntree_end: int = 0,
-        thread_count: int = -1,
-        verbose: Optional[bool] = None,
-    ):
-        return self._predict(
-            data,
-            "RawFormulaVal",
-            ntree_start,
-            ntree_end,
-            thread_count,
-            verbose,
-            "predict",
         )
