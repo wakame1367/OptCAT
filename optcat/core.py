@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Any, Optional, Union, Iterable, List
+from typing import Dict, Any, Optional, Union, List
 
 import catboost as cb
 import numpy as np
@@ -8,15 +8,10 @@ from optuna import distributions
 from optuna import samplers
 from optuna import study as study_module
 from optuna import trial as trial_module
-from scipy.sparse import spmatrix
 from sklearn.base import RegressorMixin, ClassifierMixin
-from sklearn.model_selection import BaseCrossValidator, check_cv
+from sklearn.model_selection import check_cv
 
-CVType = Union[int, Iterable, BaseCrossValidator]
-TargetDataType = Union[cb.Pool, np.ndarray, pd.DataFrame, pd.Series]
-TwoDimFeatureType = Union[List, pd.DataFrame, pd.Series]
-TwoDimSparseType = Union[pd.SparseDataFrame, spmatrix]
-MultipleDataType = Union[cb.Pool, TwoDimFeatureType, TwoDimSparseType]
+from .typing import CVType, MultipleDataType, TargetDataType
 
 
 # https://catboost.ai/docs/references/eval-metric__supported-metrics.html
