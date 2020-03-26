@@ -252,7 +252,7 @@ class CatBoostBase(cb.CatBoost):
 
     def predict(
         self,
-        data,
+        data: MultipleDataType,
         prediction_type: str = "RawFormulaVal",
         ntree_start: int = 0,
         ntree_end: int = 0,
